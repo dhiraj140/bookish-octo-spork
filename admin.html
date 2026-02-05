@@ -1,0 +1,37 @@
+<!-- admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flat Lottery System - Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Flat Lottery System</h1>
+            <p>Administrator Panel</p>
+        </div>
+    </header>
+    <nav>
+        <div class="container">
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin</a>
+            <a href="result.html">Results</a>
+        </div>
+    </nav>
+    <main class="container">
+        <h2>Administrator Dashboard</h2>
+        <button onclick="startLottery()" class="start-btn">Conduct Lottery Draw</button>
+        <div id="adminResult" class="result-container"></div>
+        <p class="note">Click the button to perform a fair random allotment using shuffle algorithm. Results will be visible here and on public page.</p>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Flat Lottery System Demo. Not affiliated with any government authority.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
