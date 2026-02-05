@@ -4,58 +4,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flat Lottery System - Apply</title>
+    <title>Flat Lottery - Apply</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Flat Lottery System</h1>
-            <p>MHADA-Inspired Housing Allotment Demo</p>
+    <div class="container">
+        <h1>Flat Lottery System</h1>
+        
+        <div id="login-section">
+            <h2>Login with Email OTP</h2>
+            <input type="email" id="email-input" placeholder="Enter your email">
+            <button onclick="handleSendOtp()">Send OTP</button>
+            
+            <div id="otp-section" class="hidden">
+                <input type="text" id="otp-input" placeholder="Enter OTP">
+                <button onclick="handleVerifyOtp()">Verify OTP</button>
+            </div>
+            <div id="login-status"></div>
         </div>
-    </header>
-    <nav>
-        <div class="container">
-            <a href="index.html">Home</a>
-            <a href="admin.html">Admin</a>
-            <a href="result.html">Results</a>
-        </div>
-    </nav>
-    <main class="container">
-        <h2>Apply for Flat Lottery</h2>
-        <form id="applyForm">
-            <div class="form-group">
-                <label for="fullName">Full Name:</label>
-                <input type="text" id="fullName" required>
-            </div>
-            <div class="form-group">
-                <label for="mobile">Mobile Number:</label>
-                <input type="tel" id="mobile" required maxlength="10">
-            </div>
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category" required>
-                    <option value="">Select Category</option>
-                    <option value="General">General</option>
-                    <option value="SC">SC</option>
-                    <option value="ST">ST</option>
-                    <option value="OBC">OBC</option>
-                    <option value="EWS">EWS</option>
-                </select>
-            </div>
-            <button type="submit">Submit Application</button>
-        </form>
 
-        <div class="disclaimer-section">
-            <h3>Disclaimer</h3>
-            <p>This is a sample demonstration website only. No real applications are processed or stored. For educational and demo purposes.</p>
+        <div id="app-section" class="hidden">
+            <h2>Application Form</h2>
+            <input type="text" id="name-input" placeholder="Full Name">
+            <input type="text" id="mobile-input" placeholder="Mobile Number">
+            <select id="category-input">
+                <option value="General">General</option>
+                <option value="SC">SC</option>
+                <option value="ST">ST</option>
+            </select>
+            <button onclick="handleSubmitApplication()">Submit Application</button>
+            <div id="app-status"></div>
+            <button onclick="logout()">Logout</button>
         </div>
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Flat Lottery System Demo. Not affiliated with any government authority.</p>
-        </div>
-    </footer>
-    <script src="script.js"></script>
+    </div>
+
+    <script>
+        let currentEmail = '';
+
+        async function handleSendOtp() {
+            const email = document.getElementById('email-input').value.trim();
+            if (!email) return alert('Enter email');
+            try {
+                await sendOtp(email);
+                currentEmail = email;
+                document.getElementById('otp-section').classList.remove('hidden');
+                document.getElementById('login-status').innerHTML = '<span class="status-success">OTP sent to your email</span>';
+            } catch (e) {
+                document.getElementById('login-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        async function handleVerifyOtp() {
+            const token = document.getElementById('otp-input').value.trim();
+            if (!token) return alert('Enter OTP');
+            try {
+                await verifyOtp(currentEmail, token);
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+                document.getElementById('app-status').innerHTML = '<span class="status-success">Logged in successfully</span>';
+            } catch (e) {
+                document.getElementById('login-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        async function handleSubmitApplication() {
+            const name = document.getElementById('name-input').value.trim();
+            const mobile = document.getElementById('mobile-input').value.trim();
+            const category = document.getElementById('category-input').value;
+            if (!name || !mobile) return alert('Fill all fields');
+            try {
+                const msg = await submitApplication(name, mobile, category);
+                document.getElementById('app-status').innerHTML = `<span class="status-success">${msg}</span>`;
+            } catch (e) {
+                document.getElementById('app-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        // Check if already logged in on load
+        window.onload = async () => {
+            const user = await getCurrentUser();
+            if (user) {
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('app-section').classList.remove('hidden');
+            }
+        };
+    </script>
 </body>
 </html>
