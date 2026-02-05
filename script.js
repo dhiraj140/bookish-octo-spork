@@ -1,117 +1,144 @@
 // script.js
-const applicants = [
-  { name: "Amit Patel", mobile: "9988776655", category: "General" },
-  { name: "Priya Sharma", mobile: "9876543210", category: "SC" },
-  { name: "Rajesh Kumar", mobile: "9123456789", category: "OBC" },
-  { name: "Sneha Reddy", mobile: "9012345678", category: "General" },
-  { name: "Vikram Singh", mobile: "8899776655", category: "ST" },
-  { name: "Anjali Desai", mobile: "9988775544", category: "EWS" },
-  { name: "Karan Mehra", mobile: "7766554433", category: "General" },
-  { name: "Meera Joshi", mobile: "6655443322", category: "OBC" }
-];
+const SUPABASE_URL = 'https://your-project-ref.supabase.co'; // REPLACE WITH YOUR SUPABASE URL
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // REPLACE WITH YOUR ANON KEY
+const ADMIN_EMAIL = 'admin@lottery.com'; // REPLACE WITH YOUR ADMIN EMAIL
 
-const flats = [
-  "A-101", "A-102", "A-103", "A-104",
-  "B-101", "B-102", "B-103", "B-104"
-];
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function shuffle(array) {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  let currentIndex = array.length;
+  while (currentIndex !== 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
   }
-  return newArray;
+  return array;
 }
 
-function startLottery() {
-  const shuffled = shuffle(applicants);
-  const results = [];
-  const num = Math.min(shuffled.length, flats.length);
-  for (let i = 0; i < num; i++) {
-    results.push({
-      flat: flats[i],
-      winner: shuffled[i]
-    });
-  }
-  localStorage.setItem("lotteryResults", JSON.stringify(results));
-  const adminContainer = document.getElementById("adminResult");
-  if (adminContainer) {
-    displayResults("adminResult");
-  }
+async function sendOtp(email) {
+  const { error } = await supabase.auth.signInWithOtp({ email });
+  if (error) throw error;
 }
 
-function displayResults(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
+async function verifyOtp(email, token) {
+  const { data, error } = await supabase.auth.verifyOtp({ email, token, type: 'email' });
+  if (error) throw error;
+  return data.user;
+}
 
-  const storedResults = localStorage.getItem("lotteryResults");
-  if (!storedResults) {
-    container.innerHTML = '<p class="no-result">Lottery draw has not been conducted yet.</p>';
-    return;
+async function logout() {
+  await supabase.auth.signOut();
+  window.location.reload();
+}
+
+async function getCurrentUser() {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+async function submitApplication(name, mobile, category) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { error: upsertError } = await supabase.from('users').upsert({
+    id: user.id,
+    name,
+    mobile,
+    email: user.email,
+    category
+  });
+  if (upsertError) throw upsertError;
+
+  const { data: existing } = await supabase.from('applications').select('id').eq('user_id', user.id).maybeSingle();
+  if (existing) throw new Error('You have already submitted an application');
+
+  const { error: insertError } = await supabase.from('applications').insert({ user_id: user.id, status: 'pending' });
+  if (insertError) throw insertError;
+
+  return 'Application submitted successfully!';
+}
+
+async function fetchApplications() {
+  const { data, error } = await supabase
+    .from('applications')
+    .select('*, users(name, mobile, category)')
+    .order('created_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+async function startLottery() {
+  const { data: statusData } = await supabase.from('lottery_status').select('executed').single();
+  if (statusData && statusData.executed) {
+    throw new Error('Lottery has already been executed');
   }
 
-  const results = JSON.parse(storedResults);
-  let html = `
-    <table class="result-table">
-      <thead>
-        <tr>
-          <th>Flat Number</th>
-          <th>Winner Name</th>
-          <th>Mobile Number</th>
-          <th>Category</th>
-        </tr>
-      </thead>
-      <tbody>
-  `;
+  const { data: apps } = await supabase
+    .from('applications')
+    .select('*, users(name, mobile, category)')
+    .eq('status', 'pending');
 
-  results.forEach((result) => {
-    html += `
-      <tr>
-        <td>${result.flat}</td>
-        <td>${result.winner.name}</td>
-        <td>${result.winner.mobile}</td>
-        <td>${result.winner.category}</td>
-      </tr>
-    `;
+  if (!apps || apps.length === 0) throw new Error('No pending applications');
+
+  const { data: flatList } = await supabase.from('flats').select('*').eq('status', 'available');
+  if (!flatList || flatList.length === 0) throw new Error('No available flats');
+
+  const applicantsByCat = {};
+  apps.forEach(app => {
+    const cat = app.users.category;
+    if (!applicantsByCat[cat]) applicantsByCat[cat] = [];
+    applicantsByCat[cat].push(app);
   });
 
-  html += `
-      </tbody>
-    </table>
-  `;
+  const flatsByCat = {};
+  flatList.forEach(f => {
+    if (!flatsByCat[f.category]) flatsByCat[f.category] = [];
+    flatsByCat[f.category].push(f);
+  });
 
-  container.innerHTML = html;
+  const updatePromises = [];
+
+  for (let cat in applicantsByCat) {
+    if (flatsByCat[cat] && flatsByCat[cat].length > 0) {
+      let applicants = applicantsByCat[cat];
+      let availFlats = [...flatsByCat[cat]];
+      availFlats.sort((a, b) => a.flat_no.localeCompare(b.flat_no));
+      shuffle(applicants);
+
+      const numAllot = Math.min(applicants.length, availFlats.length);
+
+      for (let i = 0; i < numAllot; i++) {
+        const app = applicants[i];
+        const flat = availFlats[i];
+
+        updatePromises.push(
+          supabase.from('applications')
+            .update({ flat_id: flat.id, status: 'allotted' })
+            .eq('id', app.id)
+        );
+
+        updatePromises.push(
+          supabase.from('flats')
+            .update({ status: 'allotted' })
+            .eq('id', flat.id)
+        );
+      }
+    }
+  }
+
+  if (updatePromises.length === 0) throw new Error('No allotments possible');
+
+  const results = await Promise.all(updatePromises);
+  const errors = results.filter(r => r.error);
+  if (errors.length > 0) throw new Error('Some updates failed');
+
+  await supabase.from('lottery_status').update({ executed: true }).eq('id', 1);
+
+  return 'Lottery executed successfully! Flats allotted randomly per category.';
 }
 
-window.addEventListener("load", function () {
-  const applyForm = document.getElementById("applyForm");
-  if (applyForm) {
-    applyForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      const nameEl = document.getElementById("fullName");
-      const mobileEl = document.getElementById("mobile");
-      const categoryEl = document.getElementById("category");
-
-      if (nameEl && mobileEl && categoryEl) {
-        const name = nameEl.value.trim();
-        const mobile = mobileEl.value.trim();
-        const category = categoryEl.value;
-
-        if (name && mobile.length === 10 && /^\d{10}$/.test(mobile) && category) {
-          alert(`Application submitted successfully for ${name}! (This is a demonstration only.)`);
-          applyForm.reset();
-        } else {
-          alert("Please fill all fields correctly. Mobile number must be exactly 10 digits.");
-        }
-      }
-    });
-  }
-
-  if (document.getElementById("adminResult")) {
-    displayResults("adminResult");
-  }
-  if (document.getElementById("publicResult")) {
-    displayResults("publicResult");
-  }
-});
+async function fetchWinners() {
+  const { data, error } = await supabase.from('winners').select('*').order('allotted_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
