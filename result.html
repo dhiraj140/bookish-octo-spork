@@ -4,35 +4,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flat Lottery System - Results</title>
+    <title>Flat Lottery Results</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Flat Lottery System</h1>
-            <p>Public Results</p>
-        </div>
-    </header>
-    <nav>
-        <div class="container">
-            <a href="index.html">Home</a>
-            <a href="admin.html">Admin</a>
-            <a href="result.html">Results</a>
-        </div>
-    </nav>
-    <main class="container">
-        <h2>Lottery Draw Results</h2>
-        <div id="publicResult" class="result-container"></div>
-        <div class="disclaimer-section">
-            <p>Results are generated fairly using a random but fair shuffle of predefined applicants to flats. One flat per winner.</p>
-        </div>
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Flat Lottery System Demo. Not affiliated with any government authority.</p>
-        </div>
-    </footer>
-    <script src="script.js"></script>
+    <div class="container">
+        <h1>Lottery Results</h1>
+        <button onclick="loadResults()">Refresh Results</button>
+        <table id="results-table">
+            <thead>
+                <tr><th>Flat No</th><th>Winner Name</th><th>Category</th><th>Allotted Date</th></tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadResults() {
+            try {
+                const winners = await fetchWinners();
+                const tbody = document.querySelector('#results-table tbody');
+                tbody.innerHTML = '';
+                if (winners.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No results yet</td></tr>';
+                    return;
+                }
+                winners.forEach(w => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${w.flat_no}</td>
+                        <td>${w.winner_name}</td>
+                        <td>${w.category}</td>
+                        <td>${new Date(w.allotted_at).toLocaleDateString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
+        window.onload = loadResults;
+    </script>
 </body>
 </html>
