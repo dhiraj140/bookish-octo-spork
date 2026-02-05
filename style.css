@@ -1,191 +1,86 @@
 /* style.css */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f4f8;
-    color: #333;
-    line-height: 1.6;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f7fa;
+  color: #333;
 }
 
 .container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 20px;
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-header {
-    background-color: #003087;
-    color: white;
-    text-align: center;
-    padding: 25px 0;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 2.2em;
-}
-
-header p {
-    margin: 8px 0 0;
-    opacity: 0.9;
-}
-
-nav {
-    background-color: #0055cc;
-    padding: 12px 0;
-}
-
-nav a {
-    color: white;
-    text-decoration: none;
-    padding: 12px 25px;
-    display: inline-block;
-    font-weight: bold;
-}
-
-nav a:hover {
-    background-color: #003087;
-}
-
-main {
-    background: white;
-    margin: 25px auto;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-h2 {
-    color: #003087;
-    border-bottom: 3px solid #003087;
-    padding-bottom: 10px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-    color: #444;
-}
-
-input[type="text"],
-input[type="tel"],
-select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    box-sizing: border-box;
+h1, h2 {
+  color: #2c5282;
+  text-align: center;
 }
 
 button {
-    background-color: #003087;
-    color: white;
-    padding: 14px 28px;
-    font-size: 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
+  background-color: #3182ce;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px 5px;
 }
 
 button:hover {
-    background-color: #002266;
+  background-color: #2b6cb0;
 }
 
-.start-btn {
-    background-color: #28a745;
-    font-size: 18px;
-    padding: 16px 32px;
-    margin: 20px 0;
+button.danger {
+  background-color: #e53e3e;
 }
 
-.start-btn:hover {
-    background-color: #218838;
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-size: 16px;
 }
 
-.result-container {
-    margin-top: 25px;
-    overflow-x: auto;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
 }
 
-.result-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
 }
 
-.result-table th,
-.result-table td {
-    padding: 14px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+th {
+  background-color: #edf2f7;
+  font-weight: 600;
 }
 
-.result-table th {
-    background-color: #003087;
-    color: white;
-    font-weight: bold;
+.status-success {
+  color: #38a169;
+  font-weight: bold;
 }
 
-.result-table tr:hover {
-    background-color: #f8f9fa;
+.status-error {
+  color: #e53e3e;
 }
 
-.no-result {
-    color: #666;
-    font-style: italic;
-    padding: 20px;
-    background: #f8f9fa;
-    border-left: 4px solid #003087;
+#status {
+  margin: 15px 0;
+  padding: 10px;
+  border-radius: 6px;
 }
 
-.disclaimer-section {
-    margin-top: 30px;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-left: 5px solid #003087;
-    font-size: 0.95em;
-}
-
-.note {
-    color: #555;
-    font-style: italic;
-    margin-top: 15px;
-}
-
-footer {
-    background-color: #003087;
-    color: white;
-    text-align: center;
-    padding: 15px 0;
-    margin-top: 40px;
-}
-
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.8em;
-    }
-    
-    nav a {
-        padding: 10px 15px;
-        font-size: 0.95em;
-    }
-    
-    main {
-        padding: 20px;
-        margin: 15px 10px;
-    }
-    
-    .result-table th,
-    .result-table td {
-        padding: 10px 8px;
-        font-size: 14px;
-    }
+.hidden {
+  display: none;
 }
