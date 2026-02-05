@@ -1,0 +1,61 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flat Lottery System - Apply</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Flat Lottery System</h1>
+            <p>MHADA-Inspired Housing Allotment Demo</p>
+        </div>
+    </header>
+    <nav>
+        <div class="container">
+            <a href="index.html">Home</a>
+            <a href="admin.html">Admin</a>
+            <a href="result.html">Results</a>
+        </div>
+    </nav>
+    <main class="container">
+        <h2>Apply for Flat Lottery</h2>
+        <form id="applyForm">
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" required>
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile Number:</label>
+                <input type="tel" id="mobile" required maxlength="10">
+            </div>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" required>
+                    <option value="">Select Category</option>
+                    <option value="General">General</option>
+                    <option value="SC">SC</option>
+                    <option value="ST">ST</option>
+                    <option value="OBC">OBC</option>
+                    <option value="EWS">EWS</option>
+                </select>
+            </div>
+            <button type="submit">Submit Application</button>
+        </form>
+
+        <div class="disclaimer-section">
+            <h3>Disclaimer</h3>
+            <p>This is a sample demonstration website only. No real applications are processed or stored. For educational and demo purposes.</p>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Flat Lottery System Demo. Not affiliated with any government authority.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
