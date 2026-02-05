@@ -1,7 +1,7 @@
 // script.js
-const SUPABASE_URL = 'https://your-project-ref.supabase.co'; // REPLACE WITH YOUR SUPABASE URL
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // REPLACE WITH YOUR ANON KEY
-const ADMIN_EMAIL = 'admin@lottery.com'; // REPLACE WITH YOUR ADMIN EMAIL
+const SUPABASE_URL = 'https://uzwiriyjowthnaeactuh.supabase.co'; // REPLACE WITH YOUR SUPABASE URL
+const SUPABASE_ANON_KEY = 'sb_publishable_Wq26j44XrRXgyV12GghYhQ_1HEwf4vA'; // REPLACE WITH YOUR ANON KEY
+const ADMIN_EMAIL = 'dhirajnbachhav@gmail.com'; // REPLACE WITH YOUR ADMIN EMAIL
 
 const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
