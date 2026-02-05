@@ -4,34 +4,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flat Lottery System - Admin</title>
+    <title>Admin - Flat Lottery</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <h1>Flat Lottery System</h1>
-            <p>Administrator Panel</p>
+    <div class="container">
+        <h1>Admin Panel</h1>
+        
+        <div id="login-section-admin">
+            <h2>Admin Login</h2>
+            <input type="email" id="admin-email-input" placeholder="Admin Email">
+            <button onclick="handleAdminSendOtp()">Send OTP</button>
+            <div id="admin-otp-section" class="hidden">
+                <input type="text" id="admin-otp-input" placeholder="Enter OTP">
+                <button onclick="handleAdminVerifyOtp()">Verify</button>
+            </div>
+            <div id="admin-login-status"></div>
         </div>
-    </header>
-    <nav>
-        <div class="container">
-            <a href="index.html">Home</a>
-            <a href="admin.html">Admin</a>
-            <a href="result.html">Results</a>
+
+        <div id="admin-panel" class="hidden">
+            <h2>Applications</h2>
+            <button onclick="loadApplications()">Refresh Applications</button>
+            <button onclick="handleStartLottery()" class="danger">Start Lottery</button>
+            <div id="admin-status"></div>
+            <table id="applications-table">
+                <thead>
+                    <tr><th>Name</th><th>Mobile</th><th>Category</th><th>Status</th><th>Date</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <button onclick="logout()">Logout</button>
         </div>
-    </nav>
-    <main class="container">
-        <h2>Administrator Dashboard</h2>
-        <button onclick="startLottery()" class="start-btn">Conduct Lottery Draw</button>
-        <div id="adminResult" class="result-container"></div>
-        <p class="note">Click the button to perform a fair random allotment using shuffle algorithm. Results will be visible here and on public page.</p>
-    </main>
-    <footer>
-        <div class="container">
-            <p>&copy; 2026 Flat Lottery System Demo. Not affiliated with any government authority.</p>
-        </div>
-    </footer>
-    <script src="script.js"></script>
+    </div>
+
+    <script>
+        let adminCurrentEmail = '';
+
+        async function handleAdminSendOtp() {
+            const email = document.getElementById('admin-email-input').value.trim();
+            if (!email) return alert('Enter email');
+            try {
+                await sendOtp(email);
+                adminCurrentEmail = email;
+                document.getElementById('admin-otp-section').classList.remove('hidden');
+                document.getElementById('admin-login-status').innerHTML = '<span class="status-success">OTP sent</span>';
+            } catch (e) {
+                document.getElementById('admin-login-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        async function handleAdminVerifyOtp() {
+            const token = document.getElementById('admin-otp-input').value.trim();
+            if (!token) return alert('Enter OTP');
+            try {
+                const user = await verifyOtp(adminCurrentEmail, token);
+                if (user.email !== ADMIN_EMAIL) {
+                    throw new Error('Not authorized as admin');
+                }
+                document.getElementById('login-section-admin').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadApplications();
+            } catch (e) {
+                document.getElementById('admin-login-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        async function loadApplications() {
+            try {
+                const apps = await fetchApplications();
+                const tbody = document.querySelector('#applications-table tbody');
+                tbody.innerHTML = '';
+                apps.forEach(app => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${app.users.name}</td>
+                        <td>${app.users.mobile}</td>
+                        <td>${app.users.category}</td>
+                        <td>${app.status}</td>
+                        <td>${new Date(app.created_at).toLocaleDateString()}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                document.getElementById('admin-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        async function handleStartLottery() {
+            if (!confirm('Start lottery? This cannot be undone.')) return;
+            try {
+                const msg = await startLottery();
+                document.getElementById('admin-status').innerHTML = `<span class="status-success">${msg}</span>`;
+                loadApplications();
+            } catch (e) {
+                document.getElementById('admin-status').innerHTML = `<span class="status-error">${e.message}</span>`;
+            }
+        }
+
+        // Check session on load
+        window.onload = async () => {
+            const user = await getCurrentUser();
+            if (user && user.email === ADMIN_EMAIL) {
+                document.getElementById('login-section-admin').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                loadApplications();
+            }
+        };
+    </script>
 </body>
 </html>
